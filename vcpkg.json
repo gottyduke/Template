@@ -1,10 +1,14 @@
 {
-    "name":  "template",
+    "name":  "Template",
     "version-string":  "1.0.0",
-    "description":  "template",
+    "description":  "Template",
     "license":  "MIT",
     "dependencies":  [
                          "boost-stl-interfaces",
                          "spdlog"
-                     ]
+                     ],
+    "script-version":  "11129",
+    "build-config":  "MT",
+    "build-target":  "SE",
+    "install-name":  "Template"
 }
