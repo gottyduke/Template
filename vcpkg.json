@@ -1,14 +1,13 @@
 {
     "name":  "Template",
     "version-string":  "1.0.0",
-    "description":  "Template",
+    "description":  "Template plugin for SKSEPlugin project",
     "license":  "MIT",
     "dependencies":  [
-                         "boost-stl-interfaces",
                          "spdlog"
                      ],
-    "script-version":  "11129",
+    "script-version":  "11130",
     "build-config":  "MT",
-    "build-target":  "SE",
+    "build-target":  "AE",
     "install-name":  "Template"
 }
