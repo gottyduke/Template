@@ -6,6 +6,10 @@ set(VCPKG_TARGET_TRIPLET "x64-windows-static" CACHE STRING "")
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>" CACHE STRING "")
 endif()
 
+if (not ANNIVERSARY_EDITION) {
+	set(ANNIVERSARY_EDITION FALSE CACHE BOOL "")
+}
+
 # info
 project(
 	Template
@@ -15,10 +19,7 @@ project(
 
 # out-of-source builds only
 if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
-	message(
-		FATAL_ERROR
-			"In-source builds are not allowed."
-	)
+	message(FATAL_ERROR "In-source builds are not allowed.")
 endif()
 
 configure_file(
@@ -164,7 +165,7 @@ add_custom_command(
 		COMMAND 
 			powershell -NoProfile -ExecutionPolicy Bypass -File "${CMAKE_CURRENT_SOURCE_DIR}/!Update.ps1" "COPY" "${PROJECT_VERSION}" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$(ConfigurationName)" "${PROJECT_NAME}" "${ANNIVERSARY_EDITION}"
 		COMMENT 
-			"Updating DLL to MO2 directory..."
+			"Updating project :))"
 )
 
 # called via !Rebuild.ps1

@@ -61,23 +61,26 @@ if ($Mode -eq 'COPY') { # post build event
         $GameBase = $env:SkyrimSEPath
         $MO2 = $env:MO2SkyrimSEPath
         Write-Host "`t$Folder $Version | SPECIAL EDITION"
+    } else {
+        Write-Host "`tUnknown build target specified!"
+        Exit
     }
 
     # MO2 support
     if ($MO2) {
         $Destination = Join-Path "$MO2/mods" $vcpkg.'install-name'
-        New-Item -Type Directory "$Destination/SKSE/Plugins" -Force | Out-Null
     } else {
         Add-Type -AssemblyName Microsoft.VisualBasic | Out-Null
         $Result = [Microsoft.VisualBasic.Interaction]::MsgBox("$Project has been built`n`nCopy to game folder?", 52, $Project)
         if ($Result -eq 6) {
-            $Destination = "$GameBase/Data" 
+            $Destination = Join-Path "$GameBase" "Data" 
         } else {
             Invoke-Item $Path
             Exit
         }
     }
        
+    New-Item -Type Directory "$Destination/SKSE/Plugins" -Force | Out-Null
     # binary
     Write-Host "`tCopying binary file..."
     Copy-Item "$Path/$Project.dll" "$Destination/SKSE/Plugins/$Project.dll" -Force
@@ -191,8 +194,8 @@ Write-Host "`t<$Folder> [$Mode] DONE"
 # SIG # Begin signature block
 # MIIR2wYJKoZIhvcNAQcCoIIRzDCCEcgCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUaji1lfvCI00dn5LgxStcn7Lf
-# kGmggg1BMIIDBjCCAe6gAwIBAgIQZAPCkAxHzpxOvoeEUruLiDANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQURNWSaHUMAZ1pFh8iZEk+eY5J
+# M1mggg1BMIIDBjCCAe6gAwIBAgIQZAPCkAxHzpxOvoeEUruLiDANBgkqhkiG9w0B
 # AQsFADAbMRkwFwYDVQQDDBBES1NjcmlwdFNlbGZDZXJ0MB4XDTIxMTIwMjEyMzYz
 # MFoXDTIyMTIwMjEyNTYzMFowGzEZMBcGA1UEAwwQREtTY3JpcHRTZWxmQ2VydDCC
 # ASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL9d3xGpFZgLEPcI1mIG8OPB
@@ -266,23 +269,23 @@ Write-Host "`t<$Folder> [$Mode] DONE"
 # AQEwLzAbMRkwFwYDVQQDDBBES1NjcmlwdFNlbGZDZXJ0AhBkA8KQDEfOnE6+h4RS
 # u4uIMAkGBSsOAwIaBQCgeDAYBgorBgEEAYI3AgEMMQowCKACgAChAoAAMBkGCSqG
 # SIb3DQEJAzEMBgorBgEEAYI3AgEEMBwGCisGAQQBgjcCAQsxDjAMBgorBgEEAYI3
-# AgEVMCMGCSqGSIb3DQEJBDEWBBTmXjwlFs/4U+Xt9Ch7kyhSZcygpjANBgkqhkiG
-# 9w0BAQEFAASCAQCvX9gHRIA8v84EH/xB6WyX/XfQ39pj2b9XNrDGh8wts+RlE9fa
-# IliClSChE14wrhWBBtWz55pKgDyoiiEYLIg/oQWnq6B4nlq8lFVHWTK0Fu3yuoub
-# CpXEkFTL+UCUc2+vdJ6n1LNssPmOu1HLVqwaCWRI4GLXQD9MI47vQ45jAbGGrZLk
-# KGeKhCe9jqyKbnSjvXKk6adF+d4A1er8ORbsAZdiJXbz3MQsFzJMwjWV7+DVygnN
-# VB2zuSJYa2HHiLBxFDZE/L87bICNjGgRu3X0ttF7lNILD3k7gdz90uFrFPeKr+BR
-# FWSVDjjZN4o4GdVu5vZnNCJDGtxy4d3+YeJGoYICMDCCAiwGCSqGSIb3DQEJBjGC
+# AgEVMCMGCSqGSIb3DQEJBDEWBBSSd4xP7G8jPHN8Wb81j3f8HZz8KDANBgkqhkiG
+# 9w0BAQEFAASCAQBWIwwKqG0ZDikl3WUS0upCWZ7WglzVpB2vyLAamGtihwctJAbV
+# KN8qslXFXMsye3DYLFvPUfN6bpUX4eKb+KhuxkCvc0AJm2abZCx51plUJQ0U92tR
+# 48Dn857uP5FnBmG4dW9AuG1RNxLEEIPK+G8U+Fw7RU3wTiBheL9TuufXSyPFOuVp
+# 6OiIsMmwvfNmbzhsU5j52fLpo+784SI79s8oORT3rnP/87xPHITzYd4BCZAE14IJ
+# tG7mMO80Zsh4Up36nAAKK02nZAEKEIzhqtG1Ub/lXCmgC72zAEwblaIrg3O4QFrR
+# i91IPzJumpEDBRfh7rTM0qXnuMsUigf4uEcmoYICMDCCAiwGCSqGSIb3DQEJBjGC
 # Ah0wggIZAgEBMIGGMHIxCzAJBgNVBAYTAlVTMRUwEwYDVQQKEwxEaWdpQ2VydCBJ
 # bmMxGTAXBgNVBAsTEHd3dy5kaWdpY2VydC5jb20xMTAvBgNVBAMTKERpZ2lDZXJ0
 # IFNIQTIgQXNzdXJlZCBJRCBUaW1lc3RhbXBpbmcgQ0ECEA1CSuC+Ooj/YEAhzhQA
 # 8N0wDQYJYIZIAWUDBAIBBQCgaTAYBgkqhkiG9w0BCQMxCwYJKoZIhvcNAQcBMBwG
-# CSqGSIb3DQEJBTEPFw0yMTEyMDIxMzU2NDlaMC8GCSqGSIb3DQEJBDEiBCAqd6O2
-# TotuqlBWrjqMcL36qnRAUZp3iOewzHXbNwFH+jANBgkqhkiG9w0BAQEFAASCAQBC
-# aosbu7ozh3dflLGaIAoBB7+VghtxQ8/zIMxT304nHXlOsOVKe2tFC940aaRwSFkR
-# YZwP5VKcRZcARCTvGIm6NCUB65vshNgnVcWJ1zUKDxsoUSwgztFYJZSsQ+5ASkYO
-# EhXiFl+tcsnAbmuXPlvH7uD05wZ9wZ18P5zcO2sNmGGrTVQmZ3ih21FTV/SwG6E9
-# GR8lcu5Cqjo7EuL00YvSt3t5R4rdd1Ryvih3oCNXxE7W94d4AE787ecGd0i74C9L
-# rui5Zv431PBHPfneKAuqUQOMA0DaC0JbW3/SurOMRD6kgwihQO8Q7Xs1+vikHqfG
-# E1tT8A++qFdwC7CzksgX
+# CSqGSIb3DQEJBTEPFw0yMTEyMDMxNjE1NTFaMC8GCSqGSIb3DQEJBDEiBCChKy0u
+# an2QwfWy/257SPb2mWtdmFD4Hvf9vwt9hqFffTANBgkqhkiG9w0BAQEFAASCAQAQ
+# YSCzdjMbyGpsDFn8aG2JelZgNLNEAkAaMm/MQSWzCuHkYcIQF0VachQFxqpr8VSm
+# WP89UERlaCuFBisujojeiiLDQdV2kW8+EA45ghSmO75JxCWiUt8HWxN/O5rNt4M4
+# ATVsWnFRElTwNM9nzBJeD/sDvv2xCDCDcfhP3JgsmcIsZJEamI2Z3mt1RllGyLWb
+# Z2d5djvhaaf/vsa8SfwrQj6HIlD73o2icLinptG85UPlBwuXzldwm3hIEM8BiWad
+# nr3AwPps3taN83i1xKvCaBXDAHNbQh8AqiOGI5xsx5fkvr9lfrkhVi7lyLvnZx/7
+# XdbNTm0xy1PTwcUalauk
 # SIG # End signature block

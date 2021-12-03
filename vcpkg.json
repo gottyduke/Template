@@ -6,8 +6,8 @@
     "dependencies":  [
                          "spdlog"
                      ],
-    "script-version":  "11130",
-    "build-config":  "MT",
-    "build-target":  "AE",
+    "script-version":  "",
+    "build-config":  "",
+    "build-target":  "",
     "install-name":  "Template"
 }
