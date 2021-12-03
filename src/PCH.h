@@ -1,15 +1,19 @@
 #pragma once
 
+
+// CommonLib
 #include "RE/Skyrim.h"
 #include "SKSE/SKSE.h"
 
-#include "DKUtil/Logger.hpp"
+using namespace std::literals;
 
-
+// Version
 #include "Version.h"
 
+// DKUtil
+#include "DKUtil/Logger.hpp"
 
-using namespace std::literals;
+// Include
 
 
 #define DLLEXPORT __declspec(dllexport)
