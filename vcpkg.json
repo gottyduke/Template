@@ -1,13 +1,14 @@
 {
-    "name":  "Template",
+    "name":  "template",
     "version-string":  "1.0.0",
     "description":  "Template plugin for SKSEPlugin project",
     "license":  "MIT",
     "dependencies":  [
                          "spdlog"
                      ],
-    "script-version":  "",
-    "build-config":  "",
-    "build-target":  "",
-    "install-name":  "Template"
+    "features":  {
+                     "mo2-install":  {
+                                         "description":  "Template"
+                                     }
+                 }
 }
