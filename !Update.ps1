@@ -1,14 +1,19 @@
 # args
 param (
-    [ValidateSet('COPY', 'SOURCEGEN', 'DISTRIBUTE')][string]$Mode,
+    [Parameter(Mandatory)][ValidateSet('COPY', 'SOURCEGEN', 'DISTRIBUTE')][string]$Mode,
     [string]$Version,
     [string]$Path,
     [string]$Project,
     [string]$Anniversary # VS passes in string
 )
+
+
 $ErrorActionPreference = "Stop"
 
+$Folder = $PSScriptRoot | Split-Path -Leaf
 $AcceptedExt = @('.c', '.cpp', '.cxx', '.h', '.hpp', '.hxx')
+
+
 function Resolve-Files {
     param (
         [Parameter(ValueFromPipeline)][string]$a_parent = $PSScriptRoot,
@@ -16,15 +21,29 @@ function Resolve-Files {
     )
     
     process {
-        Push-Location $PSScriptRoot # out of source invocation sucks
-        $_generated = [System.Collections.ArrayList]@()
+        Push-Location $PSScriptRoot
+        $capacity = 16
+        if ($Folder -eq 'CommonLibSSE') {
+            $capacity = 2048
+        } else {
+            $capacity = 16
+        }
+        $_generated = [System.Collections.ArrayList]::new($capacity)
 
         try {
             foreach ($directory in $a_directory) {
-                Write-Host "`t<$a_parent/$directory>"
-                Get-ChildItem "$a_parent/$directory" -Recurse -File -ErrorAction SilentlyContinue | Where-Object {($_.Extension -in $AcceptedExt) -and !($_.Name.EndsWith('Version.h'))} | Resolve-Path -Relative | ForEach-Object {
-                    Write-Host "`t`t<$_>"
+                Get-ChildItem "$a_parent/$directory" -Recurse -File -ErrorAction SilentlyContinue | Where-Object {
+                    ($_.Extension -in $AcceptedExt) -and 
+                    ($_.Name -ne 'Version.h')
+                } | Resolve-Path -Relative | ForEach-Object {
                     $_generated.Add("`n`t`"$($_.Substring(2) -replace '\\', '/')`"") | Out-Null
+                }
+
+                if (!$env:RebuildInvoke) {
+                    Write-Host "`t<$a_parent/$directory>"
+                    foreach ($file in $_generated) {
+                        Write-Host "$file"
+                    }
                 }
             }
         } finally {
@@ -35,12 +54,12 @@ function Resolve-Files {
     }
 }
 
-# project path
-$Folder = $PSScriptRoot | Split-Path -Leaf
 
-# operation
 Write-Host "`n`t<$Folder> [$Mode]"
-if ($Mode -eq 'COPY') { # post build event
+
+
+# @@COPY
+if ($Mode -eq 'COPY') {
     $GameBase = $null
     $MO2 = $null
     $Destination = $null
@@ -80,13 +99,15 @@ if ($Mode -eq 'COPY') { # post build event
 
     [System.Windows.Forms.Application]::EnableVisualStyles()
     $MsgBox = New-Object System.Windows.Forms.Form -Property @{
+        TopLevel = $true
+        TopMost = $true
         ClientSize = '350, 250'
         Text = $Project
         StartPosition = 'CenterScreen'
         FormBorderStyle = 'FixedDialog'
         MaximizeBox = $false
         MinimizeBox = $false
-        Font = New-Object System.Drawing.Font('Segoe UI', 12, [System.Drawing.FontStyle]::Regular)
+        Font = New-Object System.Drawing.Font('Segoe UI', 10, [System.Drawing.FontStyle]::Regular)
     }
     
     $Message = New-Object System.Windows.Forms.Label -Property @{
@@ -107,7 +128,10 @@ if ($Mode -eq 'COPY') { # post build event
             $Message.Text += "`nBinary file copied!"
 
             # configs
-            Get-ChildItem $PSScriptRoot -Recurse | Where-Object {($_.Extension -in '.toml', '.json', '.ini') -and ($_.Name -ne 'vcpkg.json')} | ForEach-Object {
+            Get-ChildItem $PSScriptRoot -Recurse | Where-Object {
+                ($_.Extension -in '.toml', '.json', '.ini') -and 
+                ($_.Name -ne 'vcpkg.json')
+            } | ForEach-Object {
                 Copy-Item $_.FullName "$Destination/SKSE/Plugins/$($_.Name)" -Force
                 $Message.Text += "`n$($_.Name) copied!"
             }
@@ -191,7 +215,7 @@ if ($Mode -eq 'COPY') { # post build event
                 [IO.File]::WriteAllText("$PSScriptRoot/CMakeLists.txt", $CMakeLists)
 
                 $vcpkg.'version-string' = $OutputVersion
-                $vcpkg = $vcpkg | ConvertTo-Json
+                $vcpkg = $vcpkg | ConvertTo-Json -Depth 9
                 [IO.File]::WriteAllText("$PSScriptRoot/vcpkg.json", $vcpkg)
                 
                 $Message.Text += "`n$Project has been changed from $($OriginalVersion) to $($OutputVersion)`n`nThis update will be in effect after next successful build!"
@@ -201,7 +225,11 @@ if ($Mode -eq 'COPY') { # post build event
 
     $MsgBox.ShowDialog() | Out-Null
     Exit
-} elseif ($Mode -eq 'SOURCEGEN') { # cmake sourcelist generation
+}
+
+
+# @@SOURCEGEN
+if ($Mode -eq 'SOURCEGEN') {
     Write-Host "`tGenerating CMake sourcelist..."
     Remove-Item "$Path/sourcelist.cmake" -Force -Confirm:$false -ErrorAction Ignore
 
@@ -215,33 +243,47 @@ if ($Mode -eq 'COPY') { # post build event
 
     # update vcpkg.json accordinly
     $vcpkg = [IO.File]::ReadAllText("$PSScriptRoot/vcpkg.json") | ConvertFrom-Json
+    $vcpkg.'name' = $vcpkg.'name'.ToLower()
     $vcpkg.'version-string' = $Version    
-    if ($env:RebuildInvoke) {
-        if (!($vcpkg | Get-Member features)) {
-            $features = @"
+    if (!($vcpkg | Get-Member features)) {
+        $features = @"
 {
-    "mo2-install": {
-        "description": ""
-    }
+"mo2-install": {
+    "description": ""
+}
 }
 "@ | ConvertFrom-Json
-            $features.'mo2-install'.'description' = $Folder
-            $vcpkg | Add-Member -Name 'features' -Value $features -MemberType NoteProperty
-        }
+        $features.'mo2-install'.'description' = $Folder
+        $vcpkg | Add-Member -Name 'features' -Value $features -MemberType NoteProperty
     }
 
+    # patch regression
+    $vcpkg.PsObject.Properties.Remove('script-version')
+    $vcpkg.PsObject.Properties.Remove('build-config')
+    $vcpkg.PsObject.Properties.Remove('build-target')
+    if ($vcpkg | Get-Member install-name) {
+        $vcpkg.'features'.'mo2-install'.'description' = $vcpkg.'install-name'
+    }
+    $vcpkg.PsObject.Properties.Remove('install-name')
+
+    # inversed version control
     if (Test-Path "$Path/version.rc" -PathType Leaf) {
         $VersionResource = [IO.File]::ReadAllText("$Path/version.rc") -replace "`"FileDescription`",\s`"$Folder`"",  "`"FileDescription`", `"$($vcpkg.'description')`""
         [IO.File]::WriteAllText("$Path/version.rc", $VersionResource)
     }
 
-    $vcpkg = $vcpkg | ConvertTo-Json
+    $vcpkg = $vcpkg | ConvertTo-Json -Depth 9
     [IO.File]::WriteAllText("$PSScriptRoot/vcpkg.json", $vcpkg)
-} elseif ($Mode -eq 'DISTRIBUTE') { # update script to every project
-    ((Get-ChildItem 'Plugins' -Directory -Recurse) + (Get-ChildItem 'Library' -Directory -Recurse)) | Resolve-Path -Relative | ForEach-Object {
-        if (Test-Path "$_/CMakeLists.txt" -PathType Leaf) {
-            Write-Host "`tUpdated <$_>"
-            Robocopy.exe "$PSScriptRoot" "$_" '!Update.ps1' /MT /NJS /NFL /NDL /NJH
-        }
+}
+
+
+# @@DISTRIBUTE
+if ($Mode -eq 'DISTRIBUTE') { # update script to every project
+    Get-ChildItem "$PSScriptRoot/*/*" -Directory | Where-Object {
+        $_.Name -notin @('vcpkg', 'Build', '.git', 'PluginTutorialCN') -and
+        (Test-Path "$_/CMakeLists.txt" -PathType Leaf)
+    } | ForEach-Object {
+        Write-Host "`n`tUpdated <$_>"
+        Robocopy.exe "$PSScriptRoot" "$_" '!Update.ps1' /MT /NJS /NFL /NDL /NJH | Out-Null
     }
 }
