@@ -1,14 +1,14 @@
 {
-    "name":  "template",
-    "version-string":  "1.0.0",
-    "description":  "Template plugin for SKSEPlugin project",
-    "license":  "MIT",
+    "$schema":  "https://raw.githubusercontent.com/microsoft/vcpkg/master/scripts/vcpkg.schema.json",
+    "name":  "plugintemplate",
+    "version-string":  "1.0.1",
+    "description":  "plugin template for CommonLibSSE-NG, for unified AE/SE/VR/F4 deployment.",
     "dependencies":  [
-                         "spdlog"
+                         "commonlibsse-ng"
                      ],
     "features":  {
                      "mo2-install":  {
-                                         "description":  "Template"
+                                         "description":  "PluginTemplate"
                                      }
                  }
 }
