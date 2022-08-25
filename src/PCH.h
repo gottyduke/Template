@@ -110,5 +110,11 @@
 using namespace std::literals;
 using namespace REL::literals;
 
+// Version
+#include "Version.h"
 
-#define DLLEXPORT __declspec(dllexport)
+// DKUtil
+#include "DKUtil/Logger.hpp"
+
+
+#define DLLEXPORT extern "C" [[maybe_unused]] __declspec(dllexport)

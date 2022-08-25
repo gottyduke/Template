@@ -1,11 +1,35 @@
-SKSEPluginLoad(const SKSE::LoadInterface* a_skse)
+DLLEXPORT constinit auto SKSEPlugin_Version = []() noexcept
 {
-	if (REL::Module::get().version() < SKSE::RUNTIME_SSE_LATEST_AE) {
-		ERROR("Unable to load this plugin, incompatible runtime version!\nExpected: Newer than 1-6-317-0 (A.K.A Anniversary Edition)\nDetected: {}", REL::Module::get().version().string());
-		return false;
-	}
+	SKSE::PluginVersionData data{};
+
+	data.PluginVersion(Plugin::Version);
+	data.PluginName(Plugin::NAME);
+	data.AuthorName(Plugin::AUTHOR);
+	data.UsesAddressLibrary(true);
+
+	return data;
+}();
+
+
+DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface*, SKSE::PluginInfo* pluginInfo)
+{
+    pluginInfo->name = SKSEPlugin_Version.pluginName;
+    pluginInfo->infoVersion = SKSE::PluginInfo::kVersion;
+    pluginInfo->version = SKSEPlugin_Version.pluginVersion;
+
+    return true;
+}
+
+
+DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_skse)
+{
+	DKUtil::Logger::Init(Plugin::NAME, REL::Module::get().version().string());
 
 	SKSE::Init(a_skse);
+	INFO("{} v{} loaded", Plugin::NAME, Plugin::Version);
+
+	// do stuff
+
 
 	return true;
 }

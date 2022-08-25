@@ -1,166 +1,136 @@
 {
-    "version": 3,
-    "cmakeMinimumRequired": {
-        "major": 3,
-        "minor": 21,
-        "patch": 0
-    },
-
+	"version": 3,
+	"cmakeMinimumRequired": {
+		"major": 3,
+		"minor": 21,
+		"patch": 0
+	},
 	"configurePresets": [
-	  {
-		"name": "common",
-		"hidden": true,
-		"errors": {
-		  "deprecated": true
+		{
+			"name": "common",
+			"hidden": true,
+			"cacheVariables": {
+				"SKSE_SUPPORT_XBYAK": "ON",
+				"SKSEPluginAuthor": "$env{SKSEPluginAuthor}"
+			}
 		},
-		"warnings": {
-		  "deprecated": true,
-		  "dev": true
+		{
+			"name": "vcpkg",
+			"hidden": true,
+			"cacheVariables": {
+				"CMAKE_TOOLCHAIN_FILE": {
+					"type": "STRING",
+					"value": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+				},
+				"VCPKG_TARGET_TRIPLET": "x64-windows-static-md"
+			}
+		},
+		{
+			"name": "win64",
+			"hidden": true,
+			"architecture": "x64",
+			"cacheVariables": {
+				"CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
+			}
+		},
+		{
+			"name": "msvc",
+			"hidden": true,
+			"cacheVariables": {
+				"CMAKE_CXX_FLAGS": "/EHsc /MP /W4 /WX $penv{CXXFLAGS}"
+			},
+			"generator": "Visual Studio 17 2022",
+			"vendor": {
+				"microsoft.com/VisualStudioSettings/CMake/1.0": {
+					"intelliSenseMode": "windows-msvc-x64",
+					"enableMicrosoftCodeAnalysis": true,
+					"enableClangTidyCodeAnalysis": true
+				}
+			}
+		},
+		{
+			"name": "AE",
+			"cacheVariables": {
+				"ENABLE_SKYRIM_AE": "ON",
+				"ENABLE_SKYRIM_SE": "OFF",
+				"ENABLE_SKYRIM_VR": "OFF"
+			},
+			"inherits": [
+				"common",
+				"vcpkg",
+				"win64",
+				"msvc"
+			]
+		},
+		{
+			"name": "SE",
+			"cacheVariables": {
+				"ENABLE_SKYRIM_AE": "OFF",
+				"ENABLE_SKYRIM_SE": "ON",
+				"ENABLE_SKYRIM_VR": "OFF"
+			},
+			"inherits": [
+				"common",
+				"vcpkg",
+				"win64",
+				"msvc"
+			]
+		},
+		{
+			"name": "VR",
+			"cacheVariables": {
+				"ENABLE_SKYRIM_AE": "OFF",
+				"ENABLE_SKYRIM_SE": "OFF",
+				"ENABLE_SKYRIM_VR": "ON"
+			},
+			"inherits": [
+				"common",
+				"vcpkg",
+				"win64",
+				"msvc"
+			]
+		},
+		{
+			"name": "ALL",
+			"cacheVariables": {
+				"ENABLE_SKYRIM_AE": "ON",
+				"ENABLE_SKYRIM_SE": "ON",
+				"ENABLE_SKYRIM_VR": "ON"
+			},
+			"inherits": [
+				"common",
+				"vcpkg",
+				"win64",
+				"msvc"
+			]
+		},
+		{
+			"name": "PRE-AE",
+			"cacheVariables": {
+				"ENABLE_SKYRIM_AE": "OFF",
+				"ENABLE_SKYRIM_SE": "ON",
+				"ENABLE_SKYRIM_VR": "ON"
+			},
+			"inherits": [
+				"common",
+				"vcpkg",
+				"win64",
+				"msvc"
+			]
+		},
+		{
+			"name": "FLATRIM",
+			"cacheVariables": {
+				"ENABLE_SKYRIM_AE": "ON",
+				"ENABLE_SKYRIM_SE": "ON",
+				"ENABLE_SKYRIM_VR": "OFF"
+			},
+			"inherits": [
+				"common",
+				"vcpkg",
+				"win64",
+				"msvc"
+			]
 		}
-	  },
-	  {
-		"name": "vcpkg",
-		"hidden": true,
-		"cacheVariables": {
-		  "CMAKE_TOOLCHAIN_FILE": {
-			"type": "STRING",
-			"value": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
-		  }
-		}
-	  },
-	  {
-		"name": "win64",
-		"hidden": true,
-		"architecture": "x64",
-		"cacheVariables": {
-		  "CMAKE_MSVC_RUNTIME_LIBRARY": {
-			"type": "STRING",
-			"value": "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
-		  },
-		  "VCPKG_TARGET_TRIPLET": {
-			"type": "STRING",
-			"value": "x64-windows-static-md"
-		  }
-		}
-	  },
-	  {
-		"name": "msvc",
-		"hidden": true,
-		"cacheVariables": {
-		  "CMAKE_CXX_FLAGS": "/EHsc /MP /W4 /WX $penv{CXXFLAGS}"
-		},
-		"generator": "Visual Studio 17 2022",
-		"vendor": {
-		  "microsoft.com/VisualStudioSettings/CMake/1.0": {
-			"intelliSenseMode": "windows-msvc-x64",
-			"enableMicrosoftCodeAnalysis": true,
-			"enableClangTidyCodeAnalysis": true
-		  }
-		}
-	  },
-
-	  {
-		"name": "ae",
-		"hidden": true,
-		"cacheVariables": {
-		  "ENABLE_SKYRIM_AE": {
-			"type": "STRING",
-			"value": "ON"
-		  }
-		},
-		"inherits": [
-			"common",
-			"vcpkg",
-			"win64",
-			"msvc"
-		]
-	  },
-	  {
-		"name": "se",
-		"hidden": true,
-		"cacheVariables": {
-		  "ENABLE_SKYRIM_SE": {
-			"type": "STRING",
-			"value": "ON"
-		  }
-		},
-		"inherits": [
-			"common",
-			"vcpkg",
-			"win64",
-			"msvc"
-		]
-	  },
-	  {
-		"name": "vr",
-		"hidden": true,
-		"cacheVariables": {
-		  "ENABLE_SKYRIM_VR": {
-			"type": "STRING",
-			"value": "ON"
-		  }
-		},
-		"inherits": [
-			"common",
-			"vcpkg",
-			"win64",
-			"msvc"
-		]
-	  },
-	  {
-		"name": "f4",
-		"hidden": true,
-		"cacheVariables": {
-		  "ENABLE_SKYRIM_VR": {
-			"type": "STRING",
-			"value": "ON"
-		  }
-		},
-		"inherits": [
-			"common",
-			"vcpkg",
-			"win64",
-			"msvc"
-		]
-	  },
-
-	  {
-		"name": "All",
-		"displayName": "All (AE/SE/VR)",
-		"inherits": [
-		  "se",
-		  "ae",
-		  "vr"
-		]
-	  },
-	  {
-		"name": "AE",
-		"displayName": "AE (>1.6+)",
-		"inherits": [
-			"ae"
-		]
-	  },
-	  {
-		"name": "SE",
-		"displayName": "SE (<1.5.97)",
-		"inherits": [
-			"se"
-		]
-	  },
-	  {
-		"name": "VR",
-		"displayName": "VR (Hmmm.)",
-		"inherits": [
-			"vr"
-		]
-	  },
-	  {
-		"name": "Flatrim",
-		"displayName": "Flatrim (AE/SE)",
-		"inherits": [
-			"ae",
-			"se"
-		]
-	  }
 	]
 }
