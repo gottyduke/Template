@@ -24,8 +24,8 @@ endif()
 
 # in-place configuration
 configure_file(
-	${CMAKE_CURRENT_SOURCE_DIR}/cmake/Version.h.in
-	${CMAKE_CURRENT_BINARY_DIR}/include/Version.h
+	${CMAKE_CURRENT_SOURCE_DIR}/cmake/Plugin.h.in
+	${CMAKE_CURRENT_BINARY_DIR}/include/Plugin.h
 	@ONLY
 )
 
@@ -47,7 +47,7 @@ source_group(
 
 source_group(
 	TREE ${CMAKE_CURRENT_BINARY_DIR}
-	FILES ${CMAKE_CURRENT_BINARY_DIR}/include/Version.h
+	FILES ${CMAKE_CURRENT_BINARY_DIR}/include/Plugin.h
 )
 
 # dependencies
@@ -61,7 +61,7 @@ add_library(
 	${PROJECT_NAME}
 	SHARED
 		${SOURCES}
-		${CMAKE_CURRENT_BINARY_DIR}/include/Version.h
+		${CMAKE_CURRENT_BINARY_DIR}/include/Plugin.h
 		${CMAKE_CURRENT_BINARY_DIR}/version.rc
 		.clang-format
 		vcpkg.json
@@ -133,9 +133,9 @@ add_custom_command(
 		${PROJECT_NAME}
 	POST_BUILD
 		COMMAND 
-			powershell -NoProfile -ExecutionPolicy Bypass -File "${CMAKE_CURRENT_SOURCE_DIR}/!Update.ps1" "COPY" "${PROJECT_VERSION}" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$(ConfigurationName)" "${PROJECT_NAME}" "${ANNIVERSARY_EDITION}"
+			powershell -NoProfile -ExecutionPolicy Bypass -File "${CMAKE_CURRENT_SOURCE_DIR}/!Update.ps1" "COPY" "${PROJECT_VERSION}" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$(ConfigurationName)" "${PROJECT_NAME}"
 		COMMENT 
-			"Updating project :))"
+			"Calling post build control tool"
 )
 
 # called via !Rebuild.ps1
