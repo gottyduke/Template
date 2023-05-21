@@ -6,7 +6,7 @@
 
 	DKUtil::Logger::Init(Plugin::NAME, REL::Module::get().version().string());
 
-	REL::Module::reset();
+	//REL::Module::reset();
 	SKSE::Init(a_skse);
 	
 	INFO("{} v{} loaded", Plugin::NAME, Plugin::Version);
